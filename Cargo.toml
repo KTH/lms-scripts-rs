@@ -1,6 +1,7 @@
 [workspace]
 
 members = [
+  "exam-rooms-enrollments",
   "exam-rooms-to-canvas",
   "another-one"
 ]
