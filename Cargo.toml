@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "exam-rooms-to-canvas",
+  "another-one"
+]
