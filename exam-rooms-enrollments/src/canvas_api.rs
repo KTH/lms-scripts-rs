@@ -1,15 +1,9 @@
-use serde::Deserialize;
 use reqwest::blocking::{Client, Response};
 
 pub struct CanvasApi {
     canvas_url: String,
     canvas_token: String,
     client: Client,
-}
-
-#[derive(Deserialize, Debug)]
-struct Course {
-    sis_course_id: Option<String>,
 }
 
 pub struct PageIterator<'a> {
@@ -46,14 +40,5 @@ impl CanvasApi {
             canvas_api: &self,
             next_url: Some(format!("{}{}", self.canvas_url, endpoint))
         }
-    }
-
-    pub fn get_courses(&self, account_id: &str) -> Result<Vec<Course>, reqwest::Error> {
-        let response = self
-            .get(&format!("/accounts/{}/courses", account_id))?;
-
-        println!("{:?}", response.headers().get("link"));
-
-        response.json::<Vec<Course>>()
     }
 }
