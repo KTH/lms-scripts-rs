@@ -32,8 +32,7 @@ fn get_courses(account_id: &str) -> Result<Vec<Course>, reqwest::Error> {
 
     // api.get_paginated(&format!("/accounts/{}/courses", account_id)).await?;
 
-    let response = api
-        .get(&format!("/accounts/{}/courses", account_id))?;
+    let response = api.get(&format!("/accounts/{}/courses", account_id))?;
 
     println!("{:?}", response.headers().get("link"));
 

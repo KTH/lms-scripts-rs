@@ -36,9 +36,9 @@ impl CanvasApi {
     }
 
     pub fn get_paginated(&self, endpoint: &str) -> PageIterator {
-        PageIterator{
+        PageIterator {
             canvas_api: &self,
-            next_url: Some(format!("{}{}", self.canvas_url, endpoint))
+            next_url: Some(format!("{}{}", self.canvas_url, endpoint)),
         }
     }
 }
