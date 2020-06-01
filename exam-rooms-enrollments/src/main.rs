@@ -24,6 +24,7 @@ fn env(key: &str) -> String {
 struct Course {
     id: i32,
     sis_course_id: Option<String>,
+    workflow_state: String,
 }
 
 struct CourseIterator {
@@ -76,6 +77,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let courses = get_courses("104")
         .filter(|course| course.sis_course_id.is_some())
+        .filter(|course| course.workflow_state != "unpublished")
         .filter(|course| re.is_match(&course.sis_course_id.as_ref().unwrap()));
 
     for course in courses {
