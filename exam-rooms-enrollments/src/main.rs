@@ -24,28 +24,26 @@ struct Course {
     sis_course_id: Option<String>,
 }
 
-fn get_courses(account_id: &str) -> Result<Vec<Course>, reqwest::Error> {
+fn get_courses(account_id: &str) -> () {
     let canvas_url = env("CANVAS_API_URL");
     let canvas_token = env("CANVAS_API_TOKEN");
 
     let api = CanvasApi::new(canvas_url.clone(), canvas_token.clone());
 
-    // api.get_paginated(&format!("/accounts/{}/courses", account_id)).await?;
+    let pages = api.get_paginated(&format!("/accounts/{}/courses", account_id));
 
-    let response = api.get(&format!("/accounts/{}/courses", account_id))?;
+    let courses = pages.flat_map(|response| response.unwrap().json::<Vec<Course>>().unwrap());
 
-    println!("{:?}", response.headers().get("link"));
-
-    response.json::<Vec<Course>>()
+    for course in courses {
+        println!("{:?}", course);
+    }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
     dotenv().ok();
 
-    let courses = get_courses("104")?;
-
-    println!("{:?}", courses);
+    get_courses("104");
 
     Ok(())
 }
