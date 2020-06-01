@@ -4,8 +4,6 @@ extern crate dotenv;
 use dotenv::dotenv;
 use std::env;
 
-use reqwest::header::{HeaderMap, AUTHORIZATION};
-
 fn env(key: &str) -> String {
     match env::var(key) {
         Ok(val) => val,
@@ -16,23 +14,25 @@ fn env(key: &str) -> String {
     }
 }
 
-#[tokio::main]
-async fn main() {
-    pretty_env_logger::init();
-    dotenv().ok();
-
+async fn get_courses (account_id: &str) -> Result<reqwest::Response, reqwest::Error> {
     let canvas_url = env("CANVAS_API_URL");
     let canvas_token = env("CANVAS_API_TOKEN");
 
-    let mut headers = HeaderMap::new();
-    headers.insert(AUTHORIZATION, canvas_token.parse().unwrap());
-
     let client = reqwest::Client::new();
-
-    let response = client.get(&format!("{}{}", canvas_url, "/accounts"))
+    client.get(&format!("{}/accounts/{}/courses", canvas_url, account_id))
         .bearer_auth(canvas_token)
         .send()
-        .await;
+        .await
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    pretty_env_logger::init();
+    dotenv().ok();
+
+    let response = get_courses("104").await?;
 
     println!("{:?}", response);
+
+    Ok(())
 }
