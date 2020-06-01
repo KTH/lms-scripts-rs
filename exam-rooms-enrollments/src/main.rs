@@ -3,9 +3,10 @@ extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
 use dotenv::dotenv;
+use regex::Regex;
+use serde::de::DeserializeOwned;
 use serde::Deserialize;
 use std::env;
-use regex::Regex;
 
 mod canvas_api;
 use canvas_api::{CanvasApi, PageIterator};
@@ -25,15 +26,16 @@ struct Course {
     id: i32,
     sis_course_id: Option<String>,
     workflow_state: String,
+    name: String,
 }
 
-struct CourseIterator {
+struct CanvasIterator<T> {
     page_iterator: PageIterator,
-    i: std::vec::IntoIter<Course>,
+    i: std::vec::IntoIter<T>,
 }
 
-impl Iterator for CourseIterator {
-    type Item = Course;
+impl<T: DeserializeOwned> Iterator for CanvasIterator<T> {
+    type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
         // Try to get the next element of "i"
@@ -46,7 +48,7 @@ impl Iterator for CourseIterator {
                     // No more pages left, end iteration
                     None => return None,
                     Some(page) => {
-                        self.i = page.unwrap().json::<Vec<Course>>().unwrap().into_iter();
+                        self.i = page.unwrap().json::<Vec<Self::Item>>().unwrap().into_iter();
 
                         return self.i.next();
                     }
@@ -56,14 +58,14 @@ impl Iterator for CourseIterator {
     }
 }
 
-fn get_courses(account_id: &str) -> CourseIterator {
+fn get_courses(account_id: &str) -> CanvasIterator<Course> {
     let canvas_url = env("CANVAS_API_URL");
     let canvas_token = env("CANVAS_API_TOKEN");
 
     let api = CanvasApi::new(canvas_url.clone(), canvas_token.clone());
     let page_iterator = api.get_paginated(&format!("/accounts/{}/courses", account_id));
 
-    CourseIterator {
+    CanvasIterator::<Course> {
         page_iterator,
         i: Vec::new().into_iter(),
     }
