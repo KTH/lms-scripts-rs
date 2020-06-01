@@ -4,6 +4,8 @@ extern crate dotenv;
 use dotenv::dotenv;
 use std::env;
 
+use reqwest::header::{HeaderMap, AUTHORIZATION};
+
 fn env(key: &str) -> String {
     match env::var(key) {
         Ok(val) => val,
@@ -20,9 +22,16 @@ async fn main() {
     dotenv().ok();
 
     let canvas_url = env("CANVAS_API_URL");
-    // let canvas_token = env("CANVAS_API_TOKEN");
+    let canvas_token = env("CANVAS_API_TOKEN");
 
-    let response = reqwest::get(&format!("{}{}", canvas_url, "/accounts"))
+    let mut headers = HeaderMap::new();
+    headers.insert(AUTHORIZATION, canvas_token.parse().unwrap());
+
+    let client = reqwest::Client::new();
+
+    let response = client.get(&format!("{}{}", canvas_url, "/accounts"))
+        .bearer_auth(canvas_token)
+        .send()
         .await;
 
     println!("{:?}", response);
