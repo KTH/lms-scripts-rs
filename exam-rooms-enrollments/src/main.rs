@@ -2,10 +2,11 @@ extern crate dotenv;
 extern crate pretty_env_logger;
 #[macro_use]
 extern crate log;
+use csv::Writer;
 use dotenv::dotenv;
 use regex::Regex;
 use serde::de::DeserializeOwned;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::env;
 
 mod canvas_api;
@@ -39,8 +40,19 @@ struct User {
 struct Enrollment {
     id: i32,
     sis_user_id: Option<String>,
+    sis_section_id: Option<String>,
     role: String,
     user: User,
+}
+
+#[derive(Serialize)]
+struct Row<'a> {
+    name: &'a str,
+    course: &'a str,
+    role: &'a str,
+    section: &'a str,
+    mail1: &'a str,
+    mail2: &'a str,
 }
 
 struct CanvasIterator<T> {
@@ -85,7 +97,7 @@ fn get_courses(account_id: &str) -> CanvasIterator<Course> {
     }
 }
 
-fn get_enrollments (course_id: i32) -> CanvasIterator<Enrollment> {
+fn get_enrollments(course_id: i32) -> CanvasIterator<Enrollment> {
     let canvas_url = env("CANVAS_API_URL");
     let canvas_token = env("CANVAS_API_TOKEN");
 
@@ -103,18 +115,35 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
 
     let re = Regex::new(r"^AKT\.([\w-]+)\.(\d\d\d\d-\d\d-\d\d)$").unwrap();
+    let subaccounts = vec![
+        "104", "105", "106", "107", "108", "109", "110", "111", "112", "113", "114", "115", "116",
+    ];
 
-    let courses = get_courses("104")
-        .filter(|course| course.sis_course_id.is_some())
-        .filter(|course| course.workflow_state != "unpublished")
-        .filter(|course| re.is_match(&course.sis_course_id.as_ref().unwrap()));
+    let mut wtr = Writer::from_path("list.csv")?;
 
-    for course in courses {
-        let enrollments = get_enrollments(course.id)
-            .filter(|e| e.sis_user_id.is_some());
+    for subaccount_id in subaccounts {
+        let courses = get_courses(subaccount_id)
+            .filter(|course| course.sis_course_id.is_some())
+            //.filter(|course| course.workflow_state != "unpublished")
+            .filter(|course| re.is_match(&course.sis_course_id.as_ref().unwrap()));
 
-        for enrollment in enrollments {
-            println!("{:?}", enrollment);
+        for course in courses {
+            let enrollments = get_enrollments(course.id).filter(|e| e.sis_user_id.is_some());
+
+            for enrollment in enrollments {
+                println!("{:?}", enrollment);
+                wtr.serialize(Row {
+                    course: &course.name,
+                    name: &enrollment.user.sortable_name.unwrap_or("??".to_string()),
+                    role: &enrollment.role,
+                    section: &enrollment.sis_section_id.unwrap_or("??".to_string()),
+                    mail1: &format!(
+                        "{}@kth.se",
+                        enrollment.sis_user_id.unwrap_or("??".to_string())
+                    ),
+                    mail2: &enrollment.user.login_id.unwrap_or("??".to_string()),
+                })?;
+            }
         }
     }
 
