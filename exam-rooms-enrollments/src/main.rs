@@ -29,6 +29,20 @@ struct Course {
     name: String,
 }
 
+#[derive(Deserialize, Debug, PartialEq)]
+struct User {
+    sortable_name: Option<String>,
+    login_id: Option<String>,
+}
+
+#[derive(Deserialize, Debug, PartialEq)]
+struct Enrollment {
+    id: i32,
+    sis_user_id: Option<String>,
+    role: String,
+    user: User,
+}
+
 struct CanvasIterator<T> {
     page_iterator: PageIterator,
     i: std::vec::IntoIter<T>,
@@ -71,6 +85,19 @@ fn get_courses(account_id: &str) -> CanvasIterator<Course> {
     }
 }
 
+fn get_enrollments (course_id: i32) -> CanvasIterator<Enrollment> {
+    let canvas_url = env("CANVAS_API_URL");
+    let canvas_token = env("CANVAS_API_TOKEN");
+
+    let api = CanvasApi::new(canvas_url.clone(), canvas_token.clone());
+    let page_iterator = api.get_paginated(&format!("/courses/{}/enrollments", course_id));
+
+    CanvasIterator::<Enrollment> {
+        page_iterator,
+        i: Vec::new().into_iter(),
+    }
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
     dotenv().ok();
@@ -83,7 +110,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .filter(|course| re.is_match(&course.sis_course_id.as_ref().unwrap()));
 
     for course in courses {
-        println!("{:?}", course);
+        let enrollments = get_enrollments(course.id)
+            .filter(|e| e.sis_user_id.is_some());
+
+        for enrollment in enrollments {
+            println!("{:?}", enrollment);
+        }
     }
 
     Ok(())
