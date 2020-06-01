@@ -1,13 +1,14 @@
 use reqwest::blocking::{Client, Response};
 
+#[derive(Clone)]
 pub struct CanvasApi {
     canvas_url: String,
     canvas_token: String,
     client: Client,
 }
 
-pub struct PageIterator<'a> {
-    canvas_api: &'a CanvasApi,
+pub struct PageIterator {
+    canvas_api: CanvasApi,
     next_url: Option<String>,
 }
 
@@ -41,7 +42,7 @@ fn get_next_url(response: &Result<Response, reqwest::Error>) -> Option<String> {
     get_next_from_link(link)
 }
 
-impl<'a> Iterator for PageIterator<'a> {
+impl Iterator for PageIterator {
     type Item = Result<Response, reqwest::Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -80,9 +81,9 @@ impl CanvasApi {
             .send()
     }
 
-    pub fn get_paginated(&self, endpoint: &str) -> PageIterator {
+    pub fn get_paginated(self, endpoint: &str) -> PageIterator {
         PageIterator {
-            canvas_api: &self,
+            canvas_api: self.clone(),
             next_url: Some(format!("{}{}", self.canvas_url, endpoint)),
         }
     }
