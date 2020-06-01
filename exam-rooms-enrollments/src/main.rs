@@ -5,6 +5,7 @@ extern crate log;
 use dotenv::dotenv;
 use serde::Deserialize;
 use std::env;
+use regex::Regex;
 
 mod canvas_api;
 use canvas_api::{CanvasApi, PageIterator};
@@ -21,6 +22,7 @@ fn env(key: &str) -> String {
 
 #[derive(Deserialize, Debug, PartialEq)]
 struct Course {
+    id: i32,
     sis_course_id: Option<String>,
 }
 
@@ -70,7 +72,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     pretty_env_logger::init();
     dotenv().ok();
 
-    for course in get_courses("104") {
+    let re = Regex::new(r"^AKT\.([\w-]+)\.(\d\d\d\d-\d\d-\d\d)$").unwrap();
+
+    let courses = get_courses("104")
+        .filter(|course| course.sis_course_id.is_some())
+        .filter(|course| re.is_match(&course.sis_course_id.as_ref().unwrap()));
+
+    for course in courses {
         println!("{:?}", course);
     }
 
