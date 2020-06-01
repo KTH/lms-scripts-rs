@@ -3,6 +3,7 @@ extern crate dotenv;
 #[macro_use] extern crate log;
 use dotenv::dotenv;
 use std::env;
+use serde::{Deserialize};
 
 fn env(key: &str) -> String {
     match env::var(key) {
@@ -14,7 +15,12 @@ fn env(key: &str) -> String {
     }
 }
 
-async fn get_courses (account_id: &str) -> Result<reqwest::Response, reqwest::Error> {
+#[derive(Deserialize, Debug)]
+struct Course {
+    sis_course_id: Option<String>
+}
+
+async fn get_courses (account_id: &str) -> Result<Vec<Course>, reqwest::Error> {
     let canvas_url = env("CANVAS_API_URL");
     let canvas_token = env("CANVAS_API_TOKEN");
 
@@ -22,6 +28,8 @@ async fn get_courses (account_id: &str) -> Result<reqwest::Response, reqwest::Er
     client.get(&format!("{}/accounts/{}/courses", canvas_url, account_id))
         .bearer_auth(canvas_token)
         .send()
+        .await?
+        .json::<Vec<Course>>()
         .await
 }
 
