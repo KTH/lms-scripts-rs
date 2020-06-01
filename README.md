@@ -6,6 +6,7 @@ This repository contains more than one Cargo packages (libraries and binaries) a
 
 ### Run a binary
 
+- Create a `.env` file with the required environmental variables
 - To run one binary do `cargo run --bin «name of the package»`
 - You can also `cd «name of the package»` and then `cargo run`
 

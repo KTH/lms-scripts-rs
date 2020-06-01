@@ -1,18 +1,29 @@
+extern crate pretty_env_logger;
 extern crate dotenv;
-
+#[macro_use] extern crate log;
 use dotenv::dotenv;
 use std::env;
 
 fn env(key: &str) -> String {
     match env::var(key) {
         Ok(val) => val,
-        Err(_) => panic!("Environmental variable {} not defined", key)
+        Err(_) => {
+            error!("Environmental variable {} not defined", key);
+            panic!("Environmental variable {} not defined", key);
+        }
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    pretty_env_logger::init();
     dotenv().ok();
-    let m = env("MEANING_XOF_LIFE");
 
-    println!("Meaning {}", m);
+    let canvas_url = env("CANVAS_API_URL");
+    // let canvas_token = env("CANVAS_API_TOKEN");
+
+    let response = reqwest::get(&canvas_url)
+        .await;
+
+    println!("{:?}", response);
 }
