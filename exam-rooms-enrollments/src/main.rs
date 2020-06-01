@@ -22,7 +22,7 @@ async fn main() {
     let canvas_url = env("CANVAS_API_URL");
     // let canvas_token = env("CANVAS_API_TOKEN");
 
-    let response = reqwest::get(&canvas_url)
+    let response = reqwest::get(&format!("{}{}", canvas_url, "/accounts"))
         .await;
 
     println!("{:?}", response);
