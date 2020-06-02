@@ -1,5 +1,6 @@
 use csv::Writer;
 use serde::{Deserialize, Serialize};
+use reqwest::blocking::{Client};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -18,12 +19,11 @@ struct Todo2<'a> {
     completed: bool,
 }
 
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let resp = reqwest::get("https://jsonplaceholder.typicode.com/todos")
-        .await?
-        .json::<Vec<Todo>>()
-        .await?;
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let client = Client::new();
+    let resp = client.get("https://jsonplaceholder.typicode.com/todos")
+        .send()?
+        .json::<Vec<Todo>>()?;
 
     let mut wtr = Writer::from_path("foo.csv")?;
     for row in resp.iter() {
