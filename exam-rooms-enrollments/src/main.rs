@@ -9,7 +9,7 @@ use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::env;
 
-mod canvas_api;
+extern crate canvas_api;
 use canvas_api::{CanvasApi, PageIterator};
 
 fn env(key: &str) -> String {
