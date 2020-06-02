@@ -1,6 +1,5 @@
 extern crate dotenv;
 
-use csv::Writer;
 use dotenv::dotenv;
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
@@ -35,18 +34,13 @@ struct OutputRow {
     period: String,
 }
 
-fn current_semester(all_semesters: Vec<OfferedSemester>, semester: String) -> OfferedSemester {
-    all_semesters
-        .into_iter()
-        .find(|s| s.semester == semester)
-        .unwrap()
-}
-
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     dotenv().ok();
     let kopps_url = env::var("KOPPS_API_URL").unwrap();
-
+    env::var("CANVAS_API_URL").unwrap();
     let client = Client::new();
+
+    println!("Calling Kopps API to get course rounds");
     let course_rounds = client
         .get(&format!(
             "{}/courses/offerings?from=20201&skip_coordinator_info=true",
@@ -57,29 +51,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let total_length = course_rounds.len();
 
-    let filtered: Vec<OutputRow> = course_rounds
+    let filtered: Vec<CourseRound> = course_rounds
         .into_iter()
         .filter(|round| round.state == "Godkänt")
         .filter(|round| round.first_period == "20201P3" || round.first_period == "20201P4")
-        .map(|round| OutputRow {
-            sis_id: format!(
-                "{}{}{}",
-                round.course_code, round.first_semester, round.offering_id
-            ),
-            school_code: round.school_code,
-            period: round.first_period,
-            start_date: current_semester(round.offered_semesters.clone(), "20201".to_string())
-                .start_date,
-            end_date: current_semester(round.offered_semesters, "20201".to_string()).end_date,
-        })
         .collect();
 
-    println!("{}/{}", filtered.len(), total_length);
+    println!(
+        "Course rounds in 2020-P3/P4 {}. Total course rounds in 2020-VT {}",
+        filtered.len(),
+        total_length
+    );
 
+    /*
     let mut wtr = Writer::from_path("foo.csv")?;
     for row in filtered.iter() {
         wtr.serialize(row)?;
     }
+    */
 
     Ok(())
 }
