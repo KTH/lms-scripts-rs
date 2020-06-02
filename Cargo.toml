@@ -5,4 +5,5 @@ members = [
   "todo-example",
   "another-one",
   "canvas_api",
+  "course_rounds",
 ]
