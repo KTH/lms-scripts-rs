@@ -1,5 +1,5 @@
 [package]
-name = "another-one"
+name = "another_one"
 version = "0.1.0"
 authors = ["Carlos Saito <carlos@saito.style>"]
 edition = "2018"
