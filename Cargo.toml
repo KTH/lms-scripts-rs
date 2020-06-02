@@ -2,6 +2,7 @@
 
 members = [
   "exam-rooms-enrollments",
-  "exam-rooms-to-canvas",
-  "another-one"
+  "todo-example",
+  "another-one",
+  "canvas_api",
 ]
