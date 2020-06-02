@@ -1,3 +1,4 @@
+use serde::de::DeserializeOwned;
 use reqwest::blocking::{Client, Response};
 
 #[derive(Clone)]
@@ -10,6 +11,11 @@ pub struct CanvasApi {
 pub struct PageIterator {
     canvas_api: CanvasApi,
     next_url: Option<String>,
+}
+
+pub struct ItemIterator<T> {
+    page_iterator: PageIterator,
+    i: std::vec::IntoIter<T>,
 }
 
 fn get_next_from_link(link: &str) -> Option<String> {
@@ -61,6 +67,40 @@ impl Iterator for PageIterator {
         self.next_url = get_next_url(&response);
 
         Some(response)
+    }
+}
+
+impl PageIterator {
+    pub fn items<T>(self) -> ItemIterator<T> {
+        ItemIterator::<T> {
+            page_iterator: self,
+            i: Vec::new().into_iter(),
+
+        }
+    }
+}
+
+impl<T: DeserializeOwned> Iterator for ItemIterator<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Try to get the next element of "i"
+        let element = self.i.next();
+
+        match element {
+            Some(course) => return Some(course),
+            None => {
+                match self.page_iterator.next() {
+                    // No more pages left, end iteration
+                    None => return None,
+                    Some(page) => {
+                        self.i = page.unwrap().json::<Vec<Self::Item>>().unwrap().into_iter();
+
+                        return self.i.next();
+                    }
+                }
+            }
+        };
     }
 }
 

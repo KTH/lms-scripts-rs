@@ -5,12 +5,11 @@ extern crate log;
 use csv::Writer;
 use dotenv::dotenv;
 use regex::Regex;
-use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use std::env;
 
 extern crate canvas_api;
-use canvas_api::{CanvasApi, PageIterator};
+use canvas_api::{CanvasApi, ItemIterator};
 
 fn env(key: &str) -> String {
     match env::var(key) {
@@ -55,59 +54,22 @@ struct Row<'a> {
     mail2: &'a str,
 }
 
-struct CanvasIterator<T> {
-    page_iterator: PageIterator,
-    i: std::vec::IntoIter<T>,
-}
-
-impl<T: DeserializeOwned> Iterator for CanvasIterator<T> {
-    type Item = T;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        // Try to get the next element of "i"
-        let element = self.i.next();
-
-        match element {
-            Some(course) => return Some(course),
-            None => {
-                match self.page_iterator.next() {
-                    // No more pages left, end iteration
-                    None => return None,
-                    Some(page) => {
-                        self.i = page.unwrap().json::<Vec<Self::Item>>().unwrap().into_iter();
-
-                        return self.i.next();
-                    }
-                }
-            }
-        };
-    }
-}
-
-fn get_courses(account_id: &str) -> CanvasIterator<Course> {
+fn get_courses(account_id: &str) -> ItemIterator<Course> {
     let canvas_url = env("CANVAS_API_URL");
     let canvas_token = env("CANVAS_API_TOKEN");
 
     let api = CanvasApi::new(canvas_url.clone(), canvas_token.clone());
-    let page_iterator = api.get_paginated(&format!("/accounts/{}/courses", account_id));
-
-    CanvasIterator::<Course> {
-        page_iterator,
-        i: Vec::new().into_iter(),
-    }
+    api.get_paginated(&format!("/accounts/{}/courses", account_id))
+        .items::<Course>()
 }
 
-fn get_enrollments(course_id: i32) -> CanvasIterator<Enrollment> {
+fn get_enrollments(course_id: i32) -> ItemIterator<Enrollment> {
     let canvas_url = env("CANVAS_API_URL");
     let canvas_token = env("CANVAS_API_TOKEN");
 
     let api = CanvasApi::new(canvas_url.clone(), canvas_token.clone());
-    let page_iterator = api.get_paginated(&format!("/courses/{}/enrollments", course_id));
-
-    CanvasIterator::<Enrollment> {
-        page_iterator,
-        i: Vec::new().into_iter(),
-    }
+    api.get_paginated(&format!("/courses/{}/enrollments", course_id))
+        .items::<Enrollment>()
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -124,7 +86,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for subaccount_id in subaccounts {
         let courses = get_courses(subaccount_id)
             .filter(|course| course.sis_course_id.is_some())
-            //.filter(|course| course.workflow_state != "unpublished")
             .filter(|course| re.is_match(&course.sis_course_id.as_ref().unwrap()));
 
         for course in courses {
