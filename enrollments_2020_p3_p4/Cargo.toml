@@ -1,5 +1,5 @@
 [package]
-name = "course_rounds"
+name = "enrollments_2020_p3_p4"
 version = "0.1.0"
 authors = ["Carlos Saito <carlos@saito.style>"]
 edition = "2018"
