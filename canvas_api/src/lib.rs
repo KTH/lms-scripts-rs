@@ -1,5 +1,5 @@
-use serde::de::DeserializeOwned;
 use reqwest::blocking::{Client, Response};
+use serde::de::DeserializeOwned;
 
 #[derive(Clone)]
 pub struct CanvasApi {
@@ -52,7 +52,6 @@ impl Iterator for PageIterator {
     type Item = Result<Response, reqwest::Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        println!("Next url is {:?}", self.next_url);
         let client = &self.canvas_api.client;
 
         if self.next_url == None {
@@ -75,7 +74,6 @@ impl PageIterator {
         ItemIterator::<T> {
             page_iterator: self,
             i: Vec::new().into_iter(),
-
         }
     }
 }
@@ -121,7 +119,7 @@ impl CanvasApi {
             .send()
     }
 
-    pub fn get_paginated(self, endpoint: &str) -> PageIterator {
+    pub fn get_paginated(&self, endpoint: &str) -> PageIterator {
         PageIterator {
             canvas_api: self.clone(),
             next_url: Some(format!("{}{}", self.canvas_url, endpoint)),
