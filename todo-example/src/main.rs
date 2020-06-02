@@ -1,6 +1,6 @@
 use csv::Writer;
+use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
-use reqwest::blocking::{Client};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -21,7 +21,8 @@ struct Todo2<'a> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new();
-    let resp = client.get("https://jsonplaceholder.typicode.com/todos")
+    let resp = client
+        .get("https://jsonplaceholder.typicode.com/todos")
         .send()?
         .json::<Vec<Todo>>()?;
 
