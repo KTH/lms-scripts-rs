@@ -1,9 +1,9 @@
 [workspace]
 
 members = [
-  "exam-rooms-enrollments",
   "todo-example",
   "another-one",
   "canvas_api",
+  "enrollments_exam_rooms",
   "enrollments_2020_p3_p4",
 ]
