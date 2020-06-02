@@ -1,6 +1,11 @@
+//! Helper functions to interact with the Canvas API
+//!
+//! This package contains functions to perform GET requests to the Canvas LMS
+//! API and helper functions to deal with things like pagination.
 use reqwest::blocking::{Client, Response};
 use serde::de::DeserializeOwned;
 
+/// Instance of a Canvas client. Contains the Canvas URL and the access token.
 #[derive(Clone)]
 pub struct CanvasApi {
     canvas_url: String,
@@ -8,11 +13,15 @@ pub struct CanvasApi {
     client: Client,
 }
 
+/// Iterator for pages. You use it to traverse through pages in a paginated GET
+/// request. [Read more about paginated requests in Canvas](https://canvas.instructure.com/doc/api/file.pagination.html)
 pub struct PageIterator {
     canvas_api: CanvasApi,
     next_url: Option<String>,
 }
 
+/// Iterator for items. In requests that returns multiple items, this iterator
+/// helps traversing every item. It requests the following pages automatically.
 pub struct ItemIterator<T> {
     page_iterator: PageIterator,
     i: std::vec::IntoIter<T>,
@@ -103,6 +112,15 @@ impl<T: DeserializeOwned> Iterator for ItemIterator<T> {
 }
 
 impl CanvasApi {
+    /// Creates a new CanvasApi instance by giving the URL and an access token.
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use canvas_api::CanvasApi;
+    ///
+    /// let api = CanvasApi::new("https://kth.test.instructure.com", "XXXX");
+    /// ```
     pub fn new(canvas_url: String, canvas_token: String) -> CanvasApi {
         CanvasApi {
             canvas_token,
@@ -111,7 +129,17 @@ impl CanvasApi {
         }
     }
 
-    #[allow(dead_code)]
+    /// Performs a GET request to and endpoint in Canvas. This function does
+    /// not handle any error
+    ///
+    /// Example:
+    ///
+    /// ```
+    /// use canvas_api::CanvasApi;
+    ///
+    /// let api = CanvasApi::new("https://kth.test.instructure.com", "XXXX");
+    /// api.get("/accounts/1")
+    /// ```
     pub fn get(&self, endpoint: &str) -> Result<Response, reqwest::Error> {
         self.client
             .get(&format!("{}{}", self.canvas_url, endpoint))
@@ -119,6 +147,13 @@ impl CanvasApi {
             .send()
     }
 
+    /// Returns an iterator that can be used to perform requests to a paginated
+    /// endpoint.
+    ///
+    /// See the documentation of [`PageIterator`] to learn how to traverse
+    /// through pages
+    ///
+    /// [`PageIterator`]: struct.PageIterator.html
     pub fn get_paginated(&self, endpoint: &str) -> PageIterator {
         PageIterator {
             canvas_api: self.clone(),
