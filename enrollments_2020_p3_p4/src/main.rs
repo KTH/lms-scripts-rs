@@ -6,7 +6,7 @@ use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use std::env;
 extern crate canvas_api;
-use canvas_api::{CanvasApi};
+use canvas_api::CanvasApi;
 
 #[derive(Deserialize, Debug, Clone)]
 struct CourseRound {
