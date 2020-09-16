@@ -4,13 +4,34 @@ Collection of CLI applications and libraries for doing semi-automated tasks with
 
 Also a collection of experiments made by a Rust beginner. You will probably see some JavaScript-developer bias :)
 
-## Run an app
+## Getting started
 
-Every app is in one directory, for example the [`todo_example`](./todo_example) app. To run it:
+### Run the `todo_example` app:
 
-- Copy [`.env.in`](./.env.in) to `.env` and fill it with the required environmental variables. Each application might have different environmental variables required.
-- Run one of the packages with `cargo run -p «name of the package»`
-- You can also `cd «name of the package»` and then `cargo run`
+Every app is in one directory, for example to run the [`todo_example`](./todo_example) app run:
+
+```
+cargo run -p todo_example
+```
+
+You can also run it with:
+
+```
+cd todo_example
+cargo run
+```
+
+### Run an app with environmental variables
+
+Some apps like [`enrollments_2020_p3_p4`](./enrollments_2020_p3_p4) might need environmental variables.
+
+1. Copy [`.env.in`](./.env.in) in the root of this project to `.env`. Then fill it with the required environmental variables.
+
+2. Then run the app with
+
+    ```
+    cargo run -p enrollments_2020_p3_p4
+    ```
 
 ## Development
 
