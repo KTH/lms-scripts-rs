@@ -1,12 +1,14 @@
 # LMS Scripts, now in Rust
 
-Collection of CLI applications and libraries for doing semi-automated tasks with Canvas LMS
+Collection of CLI applications and libraries for doing semi-automated tasks with Canvas LMS. Like [lms-scripts](https://github.com/kth/lms-scripts) but in Rust.
+
+Also a collection of experiments made by a Rust beginner. You will probably see some JavaScript-developer bias :)
 
 ## Run an app
 
 Every app is in one directory, for example the [`todo_example`](./todo_example) app. To run it:
 
-- Copy [`.env.in`](./.env.in) to `.env` and fill it with the required environmental variables. Each application has different environmental variables required.
+- Copy [`.env.in`](./.env.in) to `.env` and fill it with the required environmental variables. Each application might have different environmental variables required.
 - Run one of the packages with `cargo run -p «name of the package»`
 - You can also `cd «name of the package»` and then `cargo run`
 
@@ -19,7 +21,7 @@ This repository contains more than one Cargo packages (libraries and binaries) a
 This repository contains two packages as examples to help developing code quickly: a library and an application.
 
 - [`todo_example`](./todo_example) is an app that reads an API and writes its data in a file with CSV format.
-- [`canvas_api`](./canvas_api) is a library with helper functions to interact with the [Canvas LMS API](https://canvas.instructure.com/doc/api/).
+- [`canvas_api`](./canvas_api) is a library with helper functions to interact with the [Canvas LMS API](https://canvas.instructure.com/doc/api/). It is more or less similar to [@kth/canvas-api](https://github.com/kth/canvas-api) but in Rust.
 
 ### Create a new package
 

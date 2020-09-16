@@ -1,7 +1,7 @@
 [package]
 name = "enrollments_2020_p3_p4"
 version = "0.1.0"
-authors = ["Carlos Saito <carlos@saito.style>"]
+authors = ["Carlos Saito <carlos@saito.style>", "KTH Royal Institute of Technology"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
