@@ -6,4 +6,6 @@ members = [
   "canvas_api",
   "enrollments_exam_rooms",
   "enrollments_2020_p3_p4",
+  "users_without_sisid",
+  "kaltura_videos"
 ]
