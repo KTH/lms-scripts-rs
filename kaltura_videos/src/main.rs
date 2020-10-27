@@ -1,7 +1,8 @@
 extern crate dotenv;
 
+use csv::Writer;
 use reqwest::blocking::Client;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::env;
 
 #[derive(Deserialize, Debug)]
@@ -15,6 +16,12 @@ struct KalturaCategory {
 #[derive(Deserialize, Debug)]
 struct KalturaResponse {
     objects: Vec<KalturaCategory>,
+}
+
+#[derive(Serialize)]
+struct Output {
+    course_code: String,
+    count: i32,
 }
 
 fn get_entries(page: i32) -> Option<Vec<KalturaCategory>> {
@@ -38,8 +45,65 @@ fn get_entries(page: i32) -> Option<Vec<KalturaCategory>> {
     }
 }
 
+struct PageIterator {
+    current_page: i32,
+}
+
+impl Iterator for PageIterator {
+    type Item = Vec<KalturaCategory>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.current_page += 1;
+        get_entries(self.current_page)
+    }
+}
+
+struct ItemIterator {
+    page_iterator: PageIterator,
+    items: Vec<KalturaCategory>,
+}
+
+impl Iterator for ItemIterator {
+    type Item = KalturaCategory;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let element = self.items.pop();
+
+        match element {
+            Some(item) => Some(item),
+            None => match self.page_iterator.next() {
+                None => None,
+                Some(page) => {
+                    self.items = page;
+                    self.items.pop()
+                }
+            },
+        }
+    }
+}
+
+fn get_all_entries() -> ItemIterator {
+    ItemIterator {
+        page_iterator: PageIterator { current_page: 0 },
+        items: vec![],
+    }
+}
+
 fn main() {
+    let mut wtr = Writer::from_path("kaltura_list.csv").unwrap();
+
     dotenv::dotenv().ok();
-    let entries = get_entries(50);
-    println!("{:?}", entries);
+    let relevant_items = get_all_entries()
+        .filter(|item| item.name != "InContext")
+        .filter(|item| item.full_name.starts_with("Canvas>site>channels"))
+        .filter(|item| item.name.len() < 10)
+        .filter(|item| item.entries_count > 0);
+
+    for item in relevant_items {
+        wtr.serialize(Output {
+            course_code: item.name,
+            count: item.entries_count,
+        })
+        .unwrap();
+    }
 }
