@@ -21,18 +21,6 @@ cd todo_example
 cargo run
 ```
 
-### Run an app with environmental variables
-
-Some apps like [`enrollments_2020_p3_p4`](./enrollments_2020_p3_p4) might need environmental variables.
-
-1. Copy [`.env.in`](./.env.in) in the root of this project to `.env`. Then fill it with the required environmental variables.
-
-2. Then run the app with
-
-    ```
-    cargo run -p enrollments_2020_p3_p4
-    ```
-
 ## Development
 
 This repository contains more than one Cargo packages (libraries and binaries) all packaged in one workspace. [Read more about Cargo workspaces in Rust book](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html)
