@@ -1,3 +1,4 @@
+mod canvas_api;
 mod kopps_api;
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 
