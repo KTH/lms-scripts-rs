@@ -2,7 +2,6 @@
 
 members = [
   "todo_example",
-  "another_one",
   "canvas_api",
   "enrollments_exam_rooms",
   "enrollments_2020_p3_p4",
