@@ -1,8 +1,20 @@
+//! This is `todo_example`, a program that reads a list of TODOs from an API
+//! and writes that to a CSV file.
+//!
+//! It uses three libraries:
+//! - `reqwest` to fetch data from the API
+//! - `csv` to write data to the CSV file
+//! - `serde` to make the conversion between JSON string to Rust objects and
+//!   from Rust objects to CSV string
 use csv::Writer;
 use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 
-/** Structure of the JSON returned by the API */
+/// Structure of the JSON returned by the API. Implements the `Deserialize`
+/// so that `serde` can convert a JSON to this struct.
+///
+/// The `rename_all = "camelCase"` converts camelCase fields in the JSON to
+/// snake_case in Rust, so "userId" in JSON becomes "user_id" in Rust
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Todo {
@@ -12,7 +24,8 @@ struct Todo {
     completed: bool,
 }
 
-/** Structure of one row to be written */
+/// Structure of the CSV row that we are going to write. Implements the
+/// `Serialize` so that `serde` can convert the struct itself into a CSV string
 #[derive(Serialize)]
 struct Row<'a> {
     id: i32,
