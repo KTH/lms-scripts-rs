@@ -1,8 +1,10 @@
+mod kopps_api;
 use dialoguer::{theme::ColorfulTheme, Input, Select};
 
 fn main() {
     let kopps_api_url = prompt_kopps_api_url();
     let (year_term, period) = prompt_year_term_period();
+    kopps_api::get_course_rounds(&kopps_api_url, &year_term, &period);
 
     println!("Kopps API URL: {}", kopps_api_url);
     println!("Yearterm: {}. Period: {}", year_term, period);
