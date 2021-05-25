@@ -28,8 +28,13 @@ pub fn get_course_rounds(
     term: &str,
     _period: &str,
 ) -> impl Iterator<Item = CourseRound> {
+    let url_with_slash = match kopps_url.ends_with("/") {
+        true => kopps_url.to_string(),
+        false => format!("{}/", kopps_url),
+    };
+
     let suffix = format!("courses/offerings?from={}&skip_coordinator_info=true", term);
-    let full_url = Url::parse(kopps_url).unwrap().join(&suffix).unwrap();
+    let full_url = Url::parse(&url_with_slash).unwrap().join(&suffix).unwrap();
 
     Client::new()
         .get(full_url)

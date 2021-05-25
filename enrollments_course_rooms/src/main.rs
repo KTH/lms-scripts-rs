@@ -6,10 +6,6 @@ use dotenv::dotenv;
 use serde::Serialize;
 use std::env;
 
-#[macro_use]
-extern crate log;
-extern crate pretty_env_logger;
-
 #[derive(Serialize)]
 struct Row<'a> {
     name: &'a str,
@@ -21,7 +17,6 @@ struct Row<'a> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    pretty_env_logger::init();
     dotenv().ok();
 
     let kopps_api_url = env("KOPPS_API_URL");
@@ -30,8 +25,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (year_term, period) = prompt_year_term_period();
 
     let file_path = format!("enrollments-courserooms-{}-{}.csv", year_term, period);
+
+    println!("Fetching data from Kopps API");
     let course_rounds = kopps_api::get_course_rounds(&kopps_api_url, &year_term, &period)
         .filter(|round| round.first_period == format!("{}{}", year_term, period));
+
+    println!("Writing to the file `{}`", file_path);
 
     let mut wtr = Writer::from_path(file_path)?;
 
@@ -62,7 +61,7 @@ fn env(key: &str) -> String {
     match env::var(key) {
         Ok(val) => val,
         Err(_) => {
-            error!("Environmental variable {} not defined", key);
+            println!("Environmental variable {} not defined", key);
             panic!("Environmental variable {} not defined", key);
         }
     }
@@ -78,6 +77,7 @@ fn prompt_year_term_period() -> (String, String) {
 
     let terms = vec!["VT (Spring)", "HT (Fall)"];
     let term_selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose a term")
         .items(&terms)
         .default(0)
         .interact()
@@ -92,6 +92,7 @@ fn prompt_year_term_period() -> (String, String) {
     };
 
     let period_selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Choose a period")
         .items(&periods)
         .default(0)
         .interact()
