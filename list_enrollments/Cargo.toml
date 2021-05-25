@@ -14,3 +14,4 @@ url = "2.1.1"
 csv = "1.1"
 dotenv = "0.15.0"
 canvas_api = { path = "../canvas_api" }
+chrono = "0.4.19"
