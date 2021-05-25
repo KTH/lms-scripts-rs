@@ -10,6 +10,16 @@ pub struct CourseRound {
     pub school_code: String,
     pub state: String,
     pub offering_id: String,
+    pub offered_semesters: Vec<OfferedSemester>,
+}
+
+#[derive(Deserialize, Debug, Clone)]
+pub struct OfferedSemester {
+    pub start_date: String,
+    pub end_date: String,
+    pub start_week: String,
+    pub end_week: String,
+    pub semester: String,
 }
 
 /// Get all the course rounds in a given term that starts in a given period
@@ -28,4 +38,11 @@ pub fn get_course_rounds(
         .json::<Vec<CourseRound>>()
         .unwrap()
         .into_iter()
+}
+
+pub fn make_sis_id(course_round: &CourseRound) -> String {
+    format!(
+        "{}{}{}",
+        course_round.course_code, course_round.first_semester, course_round.offering_id
+    )
 }
