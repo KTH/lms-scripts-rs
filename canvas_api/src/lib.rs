@@ -138,7 +138,7 @@ impl<'a> CanvasApi<'a> {
     /// use canvas_api::CanvasApi;
     ///
     /// let api = CanvasApi::new("https://kth.test.instructure.com", "XXXX");
-    /// api.get("/accounts/1")
+    /// let result = api.get("/accounts/1").unwrap();
     /// ```
     pub fn get(&self, endpoint: &str) -> Result<Response, reqwest::Error> {
         self.client
