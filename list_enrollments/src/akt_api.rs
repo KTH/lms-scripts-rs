@@ -1,6 +1,7 @@
 use chrono::NaiveDate;
 use reqwest::blocking::Client;
 use serde::Deserialize;
+use std::time::Duration;
 use url::Url;
 
 #[derive(Deserialize, Debug, Clone)]
@@ -31,7 +32,12 @@ pub fn get_aktivitetstillfallen(
     );
     let full_url = Url::parse(&url_with_slash).unwrap().join(&suffix).unwrap();
 
-    Client::new()
+    let client = Client::builder()
+        .timeout(Duration::from_secs(60))
+        .build()
+        .unwrap();
+
+    client
         .get(full_url)
         .header("canvas_api_token", akt_token)
         .send()
