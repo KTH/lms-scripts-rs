@@ -18,19 +18,19 @@ struct Row<'a> {
     mail2: &'a str,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() {
     dotenv().ok();
 
     let option = prompt_choice();
 
     if option == 0 {
-        list_course_room_enrollments()
+        list_course_room_enrollments();
     } else {
-        list_exam_room_enrollments()
+        list_exam_room_enrollments();
     }
 }
 
-fn list_course_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
+fn list_course_room_enrollments() {
     let kopps_api_url = env("KOPPS_API_URL");
     let canvas_api_url = env("CANVAS_API_URL");
     let canvas_api_token = env("CANVAS_API_TOKEN");
@@ -44,12 +44,13 @@ fn list_course_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Writing to the file `{}`", file_path);
 
-    let mut wtr = Writer::from_path(file_path)?;
+    let mut wtr = Writer::from_path(file_path).expect("Error when creating the file");
 
     for round in course_rounds {
         let sis_id = kopps_api::make_sis_id(&round);
         let enrollments =
-            canvas_api::get_enrollments(canvas_api_url.clone(), canvas_api_token.clone(), &sis_id)?;
+            canvas_api::get_enrollments(canvas_api_url.clone(), canvas_api_token.clone(), &sis_id)
+                .expect("Error when getting enrollments");
 
         for enrollment in enrollments.into_iter() {
             wtr.serialize(Row {
@@ -62,14 +63,13 @@ fn list_course_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
                     enrollment.sis_user_id.unwrap_or("??".to_string())
                 ),
                 mail2: &enrollment.user.login_id.unwrap_or("??".to_string()),
-            })?;
+            })
+            .expect("Error when writing a row");
         }
     }
-
-    Ok(())
 }
 
-fn list_exam_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
+fn list_exam_room_enrollments() {
     let canvas_api_url = env("CANVAS_API_URL");
     let canvas_api_token = env("CANVAS_API_TOKEN");
 
@@ -80,7 +80,7 @@ fn list_exam_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
     let end_date = prompt_date("Enter the end date");
 
     let file_path = format!("enrollments-courserooms-{}---{}.csv", start_date, end_date);
-    let mut wtr = Writer::from_path(file_path)?;
+    let mut wtr = Writer::from_path(file_path).expect("Error when writing a file");
 
     for date in start_date
         .iter_days()
@@ -98,13 +98,17 @@ fn list_exam_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
                 canvas_api_url.clone(),
                 canvas_api_token.clone(),
                 &sis_id1,
-            )?;
+            )
+            .expect("Error when getting enrollments");
 
-            enrollments.append(&mut canvas_api::get_enrollments(
-                canvas_api_url.clone(),
-                canvas_api_token.clone(),
-                &sis_id2,
-            )?);
+            enrollments.append(
+                &mut canvas_api::get_enrollments(
+                    canvas_api_url.clone(),
+                    canvas_api_token.clone(),
+                    &sis_id2,
+                )
+                .expect("Error when getting enrollments"),
+            );
 
             for enrollment in enrollments.into_iter() {
                 wtr.serialize(Row {
@@ -117,12 +121,11 @@ fn list_exam_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
                         enrollment.sis_user_id.unwrap_or("??".to_string())
                     ),
                     mail2: &enrollment.user.login_id.unwrap_or("??".to_string()),
-                })?;
+                })
+                .expect("Error when writing a row");
             }
         }
     }
-
-    Ok(())
 }
 
 fn env(key: &str) -> String {
