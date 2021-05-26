@@ -7,23 +7,23 @@ use serde::de::DeserializeOwned;
 
 /// Instance of a Canvas client. Contains the Canvas URL and the access token.
 #[derive(Clone)]
-pub struct CanvasApi {
-    canvas_url: String,
-    canvas_token: String,
+pub struct CanvasApi<'a> {
+    canvas_url: &'a str,
+    canvas_token: &'a str,
     client: Client,
 }
 
 /// Iterator for pages. You use it to traverse through pages in a paginated GET
 /// request. [Read more about paginated requests in Canvas](https://canvas.instructure.com/doc/api/file.pagination.html)
-pub struct PageIterator {
-    canvas_api: CanvasApi,
+pub struct PageIterator<'a> {
+    canvas_api: CanvasApi<'a>,
     next_url: Option<String>,
 }
 
 /// Iterator for items. In requests that returns multiple items, this iterator
 /// helps traversing every item. It requests the following pages automatically.
-pub struct ItemIterator<T> {
-    page_iterator: PageIterator,
+pub struct ItemIterator<'a, T> {
+    page_iterator: PageIterator<'a>,
     i: std::vec::IntoIter<T>,
 }
 
@@ -57,7 +57,7 @@ fn get_next_url(response: &Result<Response, reqwest::Error>) -> Option<String> {
     get_next_from_link(link)
 }
 
-impl Iterator for PageIterator {
+impl<'a> Iterator for PageIterator<'a> {
     type Item = Result<Response, reqwest::Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -78,8 +78,8 @@ impl Iterator for PageIterator {
     }
 }
 
-impl PageIterator {
-    pub fn items<T>(self) -> ItemIterator<T> {
+impl<'a> PageIterator<'a> {
+    pub fn items<T>(self) -> ItemIterator<'a, T> {
         ItemIterator::<T> {
             page_iterator: self,
             i: Vec::new().into_iter(),
@@ -87,7 +87,7 @@ impl PageIterator {
     }
 }
 
-impl<T: DeserializeOwned> Iterator for ItemIterator<T> {
+impl<'a, T: DeserializeOwned> Iterator for ItemIterator<'a, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -111,7 +111,7 @@ impl<T: DeserializeOwned> Iterator for ItemIterator<T> {
     }
 }
 
-impl CanvasApi {
+impl<'a> CanvasApi<'a> {
     /// Creates a new CanvasApi instance by giving the URL and an access token.
     ///
     /// Example:
@@ -121,7 +121,7 @@ impl CanvasApi {
     ///
     /// let api = CanvasApi::new("https://kth.test.instructure.com", "XXXX");
     /// ```
-    pub fn new(canvas_url: String, canvas_token: String) -> CanvasApi {
+    pub fn new(canvas_url: &'a str, canvas_token: &'a str) -> CanvasApi<'a> {
         CanvasApi {
             canvas_token,
             canvas_url,

@@ -48,9 +48,8 @@ fn list_course_room_enrollments() {
 
     for round in course_rounds {
         let sis_id = kopps_api::make_sis_id(&round);
-        let enrollments =
-            canvas_api::get_enrollments(canvas_api_url.clone(), canvas_api_token.clone(), &sis_id)
-                .expect("Error when getting enrollments");
+        let enrollments = canvas_api::get_enrollments(&canvas_api_url, &canvas_api_token, &sis_id)
+            .expect("Error when getting enrollments");
 
         for enrollment in enrollments.into_iter() {
             wtr.serialize(Row {
@@ -94,20 +93,13 @@ fn list_exam_room_enrollments() {
             println!("- Activity {}", &round.ladok_uid);
             let sis_id1 = format!("AKT.{}", &round.ladok_uid);
             let sis_id2 = format!("AKT.{}.FUNKA", &round.ladok_uid);
-            let mut enrollments = canvas_api::get_enrollments(
-                canvas_api_url.clone(),
-                canvas_api_token.clone(),
-                &sis_id1,
-            )
-            .expect("Error when getting enrollments");
+            let mut enrollments =
+                canvas_api::get_enrollments(&canvas_api_url, &canvas_api_token, &sis_id1)
+                    .expect("Error when getting enrollments");
 
             enrollments.append(
-                &mut canvas_api::get_enrollments(
-                    canvas_api_url.clone(),
-                    canvas_api_token.clone(),
-                    &sis_id2,
-                )
-                .expect("Error when getting enrollments"),
+                &mut canvas_api::get_enrollments(&canvas_api_url, &canvas_api_token, &sis_id2)
+                    .expect("Error when getting enrollments"),
             );
 
             for enrollment in enrollments.into_iter() {

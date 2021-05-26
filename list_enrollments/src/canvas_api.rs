@@ -19,8 +19,8 @@ pub struct User {
 }
 
 pub fn get_enrollments(
-    canvas_api_url: String,
-    canvas_api_token: String,
+    canvas_api_url: &str,
+    canvas_api_token: &str,
     sis_section_id: &str,
 ) -> Result<Vec<Enrollment>, Box<dyn std::error::Error>> {
     let canvas_api = CanvasApi::new(canvas_api_url, canvas_api_token);
