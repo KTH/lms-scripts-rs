@@ -13,6 +13,12 @@ use serde::{Deserialize, Serialize};
 
 /// Prompts to the user if they want to see a list of completed TODOs,
 /// not-completed TODOs or all.
+///
+/// Returns
+///
+/// - `Some(true)` if the user only wants completed items
+/// - `Some(false)` if the user only wants non-completed items
+/// - `None` if the user wants everything
 fn prompt_completed() -> Option<bool> {
     let items = vec!["Only completed", "Only non-completed", "All"];
     let selection = Select::with_theme(&ColorfulTheme::default())
