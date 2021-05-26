@@ -3,7 +3,7 @@ mod canvas_api;
 mod kopps_api;
 use chrono::NaiveDate;
 use csv::Writer;
-use dialoguer::{theme::ColorfulTheme, Input, Password, Select};
+use dialoguer::{theme::ColorfulTheme, Input, Select};
 use dotenv::dotenv;
 use serde::Serialize;
 use std::env;
@@ -74,7 +74,7 @@ fn list_exam_room_enrollments() -> Result<(), Box<dyn std::error::Error>> {
     let canvas_api_token = env("CANVAS_API_TOKEN");
 
     let akt_api_url = env("AKTIVITETSTILLFALLEN_API_URL");
-    let akt_api_token = prompt_akt_token();
+    let akt_api_token = env("AKTIVITETSTILLFALLEN_API_TOKEN");
 
     let start_date = prompt_date("Enter the start date");
     let end_date = prompt_date("Enter the end date");
@@ -169,13 +169,6 @@ fn prompt_year_term_period() -> (String, String) {
     let period = periods[period_selection];
 
     (format!("{}{}", year, term), period.to_string())
-}
-
-fn prompt_akt_token() -> String {
-    Password::with_theme(&ColorfulTheme::default())
-        .with_prompt("Paste the Aktivitetstillfällen API token")
-        .interact()
-        .expect("Failed to prompt akt token")
 }
 
 fn prompt_choice() -> usize {
