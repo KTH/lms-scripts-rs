@@ -18,15 +18,17 @@ struct Row<'a> {
     mail2: &'a str,
 }
 
+enum UserChoice {
+    CourseRoomEnrollments,
+    ExamRoomEnrollments,
+}
+
 fn main() {
     dotenv().ok();
 
-    let option = prompt_choice();
-
-    if option == 0 {
-        list_course_room_enrollments();
-    } else {
-        list_exam_room_enrollments();
+    match prompt_choice() {
+        UserChoice::CourseRoomEnrollments => list_course_room_enrollments(),
+        UserChoice::ExamRoomEnrollments => list_exam_room_enrollments(),
     }
 }
 
@@ -71,13 +73,14 @@ fn list_exam_room_enrollments() {
     let start_date = prompt_date("Enter the start date");
     let end_date = prompt_date("Enter the end date");
 
+    let dates_range = start_date
+        .iter_days()
+        .take((end_date - start_date).num_days() as usize + 1);
+
     let file_path = format!("enrollments-courserooms-{}---{}.csv", start_date, end_date);
     let mut wtr = Writer::from_path(file_path).expect("Error when writing a file");
 
-    for date in start_date
-        .iter_days()
-        .take((end_date - start_date).num_days() as usize + 1)
-    {
+    for date in dates_range {
         println!("Getting activities for {}", date);
         let aktivitetstillfallen =
             akt_api::get_aktivitetstillfallen(&akt_api_url, &akt_api_token, &date);
@@ -148,18 +151,23 @@ fn prompt_year_term_period() -> (String, String) {
     (format!("{}{}", year, term), period.to_string())
 }
 
-fn prompt_choice() -> usize {
+fn prompt_choice() -> UserChoice {
     let options = vec![
         "Course room enrollments".to_string(),
         "Exam room enrollments".to_string(),
     ];
 
-    Select::with_theme(&ColorfulTheme::default())
+    let choice = Select::with_theme(&ColorfulTheme::default())
         .with_prompt("What do you want to do?")
         .items(&options)
         .default(0)
         .interact()
-        .expect("Failed")
+        .expect("Failed");
+
+    match choice {
+        0 => UserChoice::CourseRoomEnrollments,
+        _ => UserChoice::ExamRoomEnrollments,
+    }
 }
 
 fn prompt_date(prompt: &str) -> NaiveDate {
