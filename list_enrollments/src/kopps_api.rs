@@ -28,7 +28,7 @@ pub fn get_course_rounds(
     term: &str,
     _period: &str,
 ) -> impl Iterator<Item = CourseRound> {
-    let url_with_slash = match kopps_url.ends_with("/") {
+    let url_with_slash = match kopps_url.ends_with('/') {
         true => kopps_url.to_string(),
         false => format!("{}/", kopps_url),
     };
