@@ -1,4 +1,4 @@
-# TODO example
+# TODO example
 
 This app reads data from https://jsonplaceholder.typicode.com/todos and creates a CSV file from that data
 
