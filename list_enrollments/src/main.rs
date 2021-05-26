@@ -52,18 +52,11 @@ fn list_course_room_enrollments() {
             .expect("Error when getting enrollments");
 
         for enrollment in enrollments.into_iter() {
-            wtr.serialize(Row {
-                course: &format!("{} {}", sis_id, round.first_period),
-                name: &enrollment.user.sortable_name.unwrap_or("??".to_string()),
-                role: &enrollment.role,
-                section: &enrollment.sis_section_id.unwrap_or("??".to_string()),
-                mail1: &format!(
-                    "{}@kth.se",
-                    enrollment.sis_user_id.unwrap_or("??".to_string())
-                ),
-                mail2: &enrollment.user.login_id.unwrap_or("??".to_string()),
-            })
-            .expect("Error when writing a row");
+            write_enrollment(
+                &mut wtr,
+                &format!("{} {}", sis_id, round.first_period),
+                enrollment,
+            );
         }
     }
 }
@@ -103,18 +96,7 @@ fn list_exam_room_enrollments() {
             );
 
             for enrollment in enrollments.into_iter() {
-                wtr.serialize(Row {
-                    course: &sis_id1,
-                    name: &enrollment.user.sortable_name.unwrap_or("??".to_string()),
-                    role: &enrollment.role,
-                    section: &enrollment.sis_section_id.unwrap_or("??".to_string()),
-                    mail1: &format!(
-                        "{}@kth.se",
-                        enrollment.sis_user_id.unwrap_or("??".to_string())
-                    ),
-                    mail2: &enrollment.user.login_id.unwrap_or("??".to_string()),
-                })
-                .expect("Error when writing a row");
+                write_enrollment(&mut wtr, &sis_id1, enrollment);
             }
         }
     }
@@ -210,4 +192,23 @@ fn prompt_date(prompt: &str) -> NaiveDate {
     );
 
     NaiveDate::from_ymd(year, month, day)
+}
+
+fn write_enrollment(
+    wtr: &mut Writer<std::fs::File>,
+    course_code: &str,
+    enrollment: canvas_api::Enrollment,
+) {
+    wtr.serialize(Row {
+        course: course_code,
+        name: &enrollment.user.sortable_name.unwrap_or("??".to_string()),
+        role: &enrollment.role,
+        section: &enrollment.sis_section_id.unwrap_or("??".to_string()),
+        mail1: &format!(
+            "{}@kth.se",
+            enrollment.sis_user_id.unwrap_or("??".to_string())
+        ),
+        mail2: &enrollment.user.login_id.unwrap_or("??".to_string()),
+    })
+    .expect("Error when writing a row");
 }
