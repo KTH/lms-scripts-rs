@@ -49,7 +49,7 @@ pub fn get_all_categories(ks: String) -> impl Iterator<Item = KalturaCategory> {
 }
 
 /// Fetch all Kaltura Categories in one page
-fn fetch_categories(ks: &String, page: i32) -> Option<Vec<KalturaCategory>> {
+fn fetch_categories(ks: &str, page: i32) -> Option<Vec<KalturaCategory>> {
     let request_body = format!(
         r#"{{"ks":"{}","responseProfile": {{"objectType": "KalturaDetachedResponseProfile","type":1,"fields":"id, name, createdAt, directSubCategoriesCount, entriesCount, fullName, tags, parentId, privacyContexts"}},"filter":{{"objectType":"KalturaCategoryFilter","orderBy":"-createdAt","advancedSearch": {{"objectType":"KalturaSearchOperator","type":1,"items":[{{"objectType":"KalturaMetadataSearchItem","type":1,"metadataProfileId":2001}}]}}}},"pager":{{"objectType":"KalturaFilterPager","pageSize":250,"pageIndex":{}}},"apiVersion":"15.6.0"}}"#,
         ks, page

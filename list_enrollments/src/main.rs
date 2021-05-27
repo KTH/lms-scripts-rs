@@ -171,35 +171,10 @@ fn prompt_choice() -> UserChoice {
 }
 
 fn prompt_date(prompt: &str) -> NaiveDate {
-    let date_str: String = Input::with_theme(&ColorfulTheme::default())
+    Input::with_theme(&ColorfulTheme::default())
         .with_prompt(prompt)
         .interact_text()
-        .expect("Failed to prompt date");
-
-    let values: Vec<&str> = date_str
-        .split("-")
-        // .map(|s| s.parse::<u32>().unwrap())
-        .collect();
-
-    let (year, month, day) = (
-        values
-            .get(0)
-            .expect("Cannot get year")
-            .parse::<i32>()
-            .unwrap(),
-        values
-            .get(1)
-            .expect("Cannot get month")
-            .parse::<u32>()
-            .unwrap(),
-        values
-            .get(2)
-            .expect("Cannot get day")
-            .parse::<u32>()
-            .unwrap(),
-    );
-
-    NaiveDate::from_ymd(year, month, day)
+        .expect("Failed to prompt date")
 }
 
 fn write_enrollment(
@@ -209,14 +184,13 @@ fn write_enrollment(
 ) {
     wtr.serialize(Row {
         course: course_code,
-        name: &enrollment.user.sortable_name.unwrap_or("??".to_string()),
+        name: enrollment.user.sortable_name.as_deref().unwrap_or("??"),
         role: &enrollment.role,
-        section: &enrollment.sis_section_id.unwrap_or("??".to_string()),
-        mail1: &format!(
-            "{}@kth.se",
-            enrollment.sis_user_id.unwrap_or("??".to_string())
-        ),
-        mail2: &enrollment.user.login_id.unwrap_or("??".to_string()),
+        section: enrollment.sis_section_id.as_deref().unwrap_or("??"),
+        mail1: enrollment.sis_user_id
+            .map(|u| format!("{}@kth.se", u))
+            .as_deref().unwrap_or("??"),
+        mail2: enrollment.user.login_id.as_deref().unwrap_or("??"),
     })
     .expect("Error when writing a row");
 }

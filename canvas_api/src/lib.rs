@@ -33,7 +33,7 @@ fn get_next_from_link(link: &str) -> Option<String> {
     let next_url = match next_link {
         None => return None,
         Some(next_link) => next_link
-            .trim_start_matches("<")
+            .trim_start_matches('<')
             .trim_end_matches(">; rel=\"next\""),
     };
 
@@ -95,19 +95,19 @@ impl<'a, T: DeserializeOwned> Iterator for ItemIterator<'a, T> {
         let element = self.i.next();
 
         match element {
-            Some(course) => return Some(course),
+            Some(course) => Some(course),
             None => {
                 match self.page_iterator.next() {
                     // No more pages left, end iteration
-                    None => return None,
+                    None => None,
                     Some(page) => {
                         self.i = page.unwrap().json::<Vec<Self::Item>>().unwrap().into_iter();
 
-                        return self.i.next();
+                        self.i.next()
                     }
                 }
             }
-        };
+        }
     }
 }
 
@@ -138,7 +138,7 @@ impl<'a> CanvasApi<'a> {
     /// use canvas_api::CanvasApi;
     ///
     /// let api = CanvasApi::new("https://kth.test.instructure.com", "XXXX");
-    /// api.get("/accounts/1")
+    /// let result = api.get("/accounts/1").unwrap();
     /// ```
     pub fn get(&self, endpoint: &str) -> Result<Response, reqwest::Error> {
         self.client
