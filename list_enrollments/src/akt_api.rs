@@ -21,7 +21,7 @@ pub fn get_aktivitetstillfallen(
     akt_token: &str,
     date: &NaiveDate,
 ) -> impl Iterator<Item = Aktivitetstillfalle> {
-    let url_with_slash = match akt_url.ends_with("/") {
+    let url_with_slash = match akt_url.ends_with('/') {
         true => akt_url.to_string(),
         false => format!("{}/", akt_url),
     };
