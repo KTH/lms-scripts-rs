@@ -50,6 +50,7 @@ fn list_course_room_enrollments() {
 
     for round in course_rounds {
         let sis_id = kopps_api::make_sis_id(&round);
+        println!("Round {}", &sis_id);
         let enrollments = canvas_api::get_enrollments(&canvas_api_url, &canvas_api_token, &sis_id)
             .expect("Error when getting enrollments");
 
