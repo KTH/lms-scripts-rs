@@ -78,7 +78,7 @@ fn list_exam_room_enrollments() {
         .iter_days()
         .take((end_date - start_date).num_days() as usize + 1);
 
-    let file_path = format!("enrollments-courserooms-{}---{}.csv", start_date, end_date);
+    let file_path = format!("enrollments-examrooms-{}---{}.csv", start_date, end_date);
     let mut wtr = Writer::from_path(file_path).expect("Error when writing a file");
 
     for date in dates_range {
@@ -188,9 +188,11 @@ fn write_enrollment(
         name: enrollment.user.sortable_name.as_deref().unwrap_or("??"),
         role: &enrollment.role,
         section: enrollment.sis_section_id.as_deref().unwrap_or("??"),
-        mail1: enrollment.sis_user_id
+        mail1: enrollment
+            .sis_user_id
             .map(|u| format!("{}@kth.se", u))
-            .as_deref().unwrap_or("??"),
+            .as_deref()
+            .unwrap_or("??"),
         mail2: enrollment.user.login_id.as_deref().unwrap_or("??"),
     })
     .expect("Error when writing a row");
