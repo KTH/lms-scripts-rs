@@ -33,7 +33,7 @@ pub fn get_aktivitetstillfallen(
     let full_url = Url::parse(&url_with_slash).unwrap().join(&suffix).unwrap();
 
     let client = Client::builder()
-        .timeout(Duration::from_secs(60))
+        .timeout(Duration::from_secs(300))
         .build()
         .unwrap();
 
