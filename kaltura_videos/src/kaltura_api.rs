@@ -57,7 +57,9 @@ fn fetch_categories(ks: &str, page: i32) -> Option<Vec<KalturaCategory>> {
 
     let client = Client::new();
     let response = client
-        .post("https://api.kaltura.nordu.net/api_v3/service/category/action/list?format=1&clientTag=kmcng")
+        .post(
+            "https://www.kaltura.com/api_v3/service/category/action/list?format=1&clientTag=kmcng",
+        )
         .header("Content-Type", "application/json")
         .body(request_body)
         .send()
